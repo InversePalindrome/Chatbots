@@ -4,7 +4,7 @@ import re
 import slackclient
 
 from chatterbot import ChatBot
-from chatterbot.trainers import ChatterBotCorpusTrainer
+from MathLogicAdapter import MathLogicAdapter
 
 
 socket_delay = 1
@@ -18,11 +18,15 @@ sc = slackclient.SlackClient(slack_token)
 
 bot_id = sc.api_call("auth.test")["user_id"]
 
-chatbot = ChatBot("Tycho")
-chatbot.set_trainer(ChatterBotCorpusTrainer)
-chatbot.train("chatterbot.corpus.english")
+chatbot = ChatBot("MathBot", 
+               logic_adapters=[
+                   {
+                       "import_path" : "MathLogicAdapter.MathLogicAdapter"
+                   }
+              ]
+          )
 
-def handle_event(event):
+def handle_event(event): 
     event_type = event.get("type")
     channel = event.get("channel")
     text = event.get("text")
@@ -35,7 +39,7 @@ def handle_message(channel, text):
 
     if user_id == bot_id:
         response = str(chatbot.get_response(message))
-    
+        
         sc.api_call("chat.postMessage", text=response, channel=channel)
 
 def parse_direct_mention(text):
@@ -53,7 +57,6 @@ def run_chatbot():
            
             time.sleep(socket_delay)
        
-
 if __name__ == '__main__':
     run_chatbot()
     
