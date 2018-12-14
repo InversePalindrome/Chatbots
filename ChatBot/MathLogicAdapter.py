@@ -1,3 +1,4 @@
+import ast
 import cexprtk 
 
 from chatterbot.logic import LogicAdapter
@@ -9,10 +10,26 @@ class MathLogicAdapter(LogicAdapter):
         return super().__init__(**kwargs)
 
     def can_process(self, statement):
-        return True
+        return len(statement.text) > 0
 
     def process(self, statement):
-        solution = Statement(str(cexprtk.evaluate_expression(statement.text, {})))
+        formula = statement.text.split(",", 1)
+        
+        expression = formula[0]
+        symbol_table = {}
+
+        if len(formula) > 1:
+            try:
+                symbol_table = ast.literal_eval(formula[1].strip())
+            except(ValueError, SyntaxError):
+                return Statement("Symbol-Table couldn't be parsed!")
+
+        try:
+            evaluaded_expression = cexprtk.evaluate_expression(expression, symbol_table)
+        except cexprtk.ParseException:
+            return Statement("Expression couldn't be evaluated!")
+            
+        solution = Statement(str(evaluaded_expression))
         solution.confidence = 1
         
         return solution
