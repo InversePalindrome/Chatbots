@@ -1,3 +1,10 @@
+"""
+Copyright (c) 2018 Inverse Palindrome
+Chatbot - MathLogicAdapter.py
+https://inversepalindrome.com/
+"""
+
+
 import ast
 import cexprtk 
 
@@ -12,7 +19,10 @@ def evaluate_expression(expression):
         evaluated_expression = cexprtk.Expression(expression, symbol_table)()
     except cexprtk.ParseException:
         return Statement("Expression couldn't be evaluated!")
-            
+           
+    if evaluated_expression.is_integer():
+        evaluated_expression = int(evaluated_expression)
+
     solution = Statement(str(evaluated_expression))
     solution.confidence = 1
         

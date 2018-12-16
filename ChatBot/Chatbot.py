@@ -1,3 +1,10 @@
+"""
+Copyright (c) 2018 Inverse Palindrome
+Chatbot - Chatbot.py
+https://inversepalindrome.com/
+"""
+
+
 import os
 import time
 import re
@@ -14,9 +21,9 @@ slack_token = os.environ["SLACK_API_TOKEN"]
 slack_client_id = os.environ["SLACK_CLIENT_ID"]
 slack_client_secret = os.environ["SLACK_CLIENT_SECRET"]
 
-sc = slackclient.SlackClient(slack_token)
+slack_client = slackclient.SlackClient(slack_token)
 
-bot_id = sc.api_call("auth.test")["user_id"]
+bot_id = slack_client.api_call("auth.test")["user_id"]
 
 chatbot = ChatBot("MathBot", 
                logic_adapters=[
@@ -40,7 +47,7 @@ def handle_message(channel, text):
     if user_id == bot_id:
         response = str(chatbot.get_response(message))
         
-        sc.api_call("chat.postMessage", text=response, channel=channel)
+        slack_client.api_call("chat.postMessage", text=response, channel=channel)
 
 def parse_direct_mention(text):
     matches = re.search(direct_mention_regex, text)
@@ -48,9 +55,9 @@ def parse_direct_mention(text):
     return (matches.group(1), matches.group(2).strip()) if matches else (None, None)
 
 def run_chatbot():
-    if sc.rtm_connect():
+    if slack_client.rtm_connect():
         while True:
-            event_list = sc.rtm_read()
+            event_list = slack_client.rtm_read()
 
             for event in event_list:   
                 handle_event(event)
@@ -59,4 +66,3 @@ def run_chatbot():
        
 if __name__ == '__main__':
     run_chatbot()
-    
