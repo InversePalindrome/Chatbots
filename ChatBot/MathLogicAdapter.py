@@ -7,12 +7,16 @@ https://inversepalindrome.com/
 
 import ast
 import cexprtk 
+import numpy as np
+import matplotlib.pyplot as plt
 
+from pynumparser import NumberSequence
 from chatterbot.logic import LogicAdapter
 from chatterbot.conversation import Statement
 
 
 symbol_table = cexprtk.Symbol_Table({}, {}, True)
+sequence_parser = NumberSequence(float)
 
 def evaluate_expression(expression):
     try:
@@ -22,11 +26,8 @@ def evaluate_expression(expression):
            
     if evaluated_expression.is_integer():
         evaluated_expression = int(evaluated_expression)
-
-    solution = Statement(str(evaluated_expression))
-    solution.confidence = 1
         
-    return solution
+    return Statement(str(evaluated_expression))
 
 def import_symbols(expression):
     symbols = expression.split(' ', 1)
@@ -43,17 +44,31 @@ def import_symbols(expression):
     except (SyntaxError, ValueError):
         return Statement("Nothing could be imported.")    
 
+def plot_function(expression):
+    expression_list = expression.split(' ', 1)
+
+    equation_string = expression_list[0]
+    range_string = expression_list[1].strip()
+
+    x = np.array(sequence_parser(range_string))
+    y = eval(equation_string)
+    
+    plt.plot(x, y)
+    plt.savefig("testpythonfunction.png")
+
+    return Statement("Equation " + equation_string + " graphed.")
+
 class MathLogicAdapter(LogicAdapter):
     def __init__(self, **kwargs):
         return super().__init__(**kwargs)
 
     def can_process(self, statement):
-        return (statement.text.startswith("Evaluate") and len(statement.text.split(' ', 1)) > 1) or (
+        return (statement.text.startswith(("Evaluate", "Plot")) and len(statement.text.split(' ', 1)) > 1) or (
             statement.text.startswith("Import") and len(statement.text.split(' ', 2)) > 2)
 
     def process(self, statement):
         statement_text = statement.text.split(' ', 1)
-
+      
         command = statement_text[0]
         expression = statement_text[1]
 
@@ -61,5 +76,7 @@ class MathLogicAdapter(LogicAdapter):
             return evaluate_expression(expression)
         elif command == "Import":
             return import_symbols(expression)
+        elif command == "Plot":
+            return plot_function(expression)
         else:
             return Statement("Can't comprehend expression")

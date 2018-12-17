@@ -20,7 +20,6 @@ direct_mention_regex = "^<@(|[WU].+?)>(.*)"
 slack_token = os.environ["SLACK_API_TOKEN"]
 slack_client_id = os.environ["SLACK_CLIENT_ID"]
 slack_client_secret = os.environ["SLACK_CLIENT_SECRET"]
-
 slack_client = slackclient.SlackClient(slack_token)
 
 bot_id = slack_client.api_call("auth.test")["user_id"]
