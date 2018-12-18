@@ -5,26 +5,20 @@ https://inversepalindrome.com/
 """
 
 
-import os
-import time
 import re
-import slackclient
+import time
+import Slack
+import MathLogicAdapter
+import SlackOutputAdapter
 
 from chatterbot import ChatBot
-from MathLogicAdapter import MathLogicAdapter
 
 
 socket_delay = 1
 direct_mention_regex = "^<@(|[WU].+?)>(.*)"
 
-slack_token = os.environ["SLACK_API_TOKEN"]
-slack_client_id = os.environ["SLACK_CLIENT_ID"]
-slack_client_secret = os.environ["SLACK_CLIENT_SECRET"]
-slack_client = slackclient.SlackClient(slack_token)
-
-bot_id = slack_client.api_call("auth.test")["user_id"]
-
 chatbot = ChatBot("MathBot", 
+               output_adapter="SlackOutputAdapter.SlackOutputAdapter",
                logic_adapters=[
                    {
                        "import_path" : "MathLogicAdapter.MathLogicAdapter"
@@ -33,20 +27,18 @@ chatbot = ChatBot("MathBot",
           )
 
 def handle_event(event): 
-    event_type = event.get("type")
-    channel = event.get("channel")
+    Slack.event_type = event.get("type")
+    Slack.channel = event.get("channel")
     text = event.get("text")
 
-    if event_type == "message" and not "subtype" in event:
-        handle_message(channel, text)
+    if Slack.event_type == "message" and not "subtype" in event:
+        handle_message(text)
 
-def handle_message(channel, text):
+def handle_message(text):
     user_id, message = parse_direct_mention(text)
 
-    if user_id == bot_id:
-        response = str(chatbot.get_response(message))
-        
-        slack_client.api_call("chat.postMessage", text=response, channel=channel)
+    if user_id == Slack.bot_id:
+        chatbot.get_response(message)
 
 def parse_direct_mention(text):
     matches = re.search(direct_mention_regex, text)
@@ -54,9 +46,9 @@ def parse_direct_mention(text):
     return (matches.group(1), matches.group(2).strip()) if matches else (None, None)
 
 def run_chatbot():
-    if slack_client.rtm_connect():
+    if Slack.client.rtm_connect():
         while True:
-            event_list = slack_client.rtm_read()
+            event_list = Slack.client.rtm_read()
 
             for event in event_list:   
                 handle_event(event)
