@@ -8,9 +8,10 @@ https://inversepalindrome.com/
 import ast
 import Slack
 import cexprtk 
-import numpy as np
+import numexpr
 import matplotlib.pyplot as plt
 
+from numpy import *
 from pynumparser import NumberSequence
 from chatterbot.logic import LogicAdapter
 from chatterbot.conversation import Statement
@@ -50,22 +51,35 @@ def plot_function(expression):
 
     equation_string = expression_list[0].strip()
     range_string = expression_list[1].strip()
-   
-    x = np.array(sequence_parser(range_string))
-    y = eval(equation_string)
+
+    try:
+        x = array(sequence_parser(range_string))
+        y = numexpr.evaluate(equation_string)
+    except (ValueError, TypeError):
+        return Statement("Graph could not be plotted.")
   
-    plt.plot(x, y)
-    plt.savefig("plot.png")
+    plt.plot(x, y, label=equation_string)
+    lgd = plt.legend(loc = "upper left", bbox_to_anchor = (1.02, 1))
+    plt.xlabel("X")
+    plt.ylabel("Y")
+    plt.savefig("plot.png", bbox_extra_artists = (lgd, ), bbox_inches="tight")
 
     Slack.filename = "plot.png"
 
-    return Statement("Equation " + equation_string + " graphed.")
+    return Statement("Plot succesfully graphed.")
+
+def clear_plot():
+    plt.close()
+
+    return Statement("Plot cleared.")
 
 class MathLogicAdapter(LogicAdapter):
     def can_process(self, statement):
         return (statement.text.startswith("Evaluate") and len(statement.text.split(' ', 1)) > 1) or (
             statement.text.startswith("Import") and len(statement.text.split(' ', 2)) > 2) or (
-                statement.text.startswith("Plot") and len(statement.text.split(',', 1)) > 1) 
+                statement.text.startswith("Plot") and len(statement.text.split(',', 1)) > 1) or (
+                    statement.text.startswith("Clear") and len(statement.text.split(' ', 1)) > 1)
+
 
     def process(self, statement):
         statement_text = statement.text.split(' ', 1)
@@ -79,5 +93,7 @@ class MathLogicAdapter(LogicAdapter):
             return import_symbols(expression)
         elif command == "Plot":
             return plot_function(expression)
+        elif command == "Clear" and expression == "Plot":
+            return clear_plot()
         else:
             return Statement("Can't comprehend expression")
