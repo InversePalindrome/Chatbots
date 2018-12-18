@@ -6,6 +6,7 @@ https://inversepalindrome.com/
 
 
 import ast
+import Slack
 import cexprtk 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -45,26 +46,26 @@ def import_symbols(expression):
         return Statement("Nothing could be imported.")    
 
 def plot_function(expression):
-    expression_list = expression.split(' ', 1)
+    expression_list = expression.split(',', 1)
 
-    equation_string = expression_list[0]
+    equation_string = expression_list[0].strip()
     range_string = expression_list[1].strip()
-
+   
     x = np.array(sequence_parser(range_string))
     y = eval(equation_string)
-    
+  
     plt.plot(x, y)
-    plt.savefig("testpythonfunction.png")
+    plt.savefig("plot.png")
+
+    Slack.filename = "plot.png"
 
     return Statement("Equation " + equation_string + " graphed.")
 
 class MathLogicAdapter(LogicAdapter):
-    def __init__(self, **kwargs):
-        return super().__init__(**kwargs)
-
     def can_process(self, statement):
-        return (statement.text.startswith(("Evaluate", "Plot")) and len(statement.text.split(' ', 1)) > 1) or (
-            statement.text.startswith("Import") and len(statement.text.split(' ', 2)) > 2)
+        return (statement.text.startswith("Evaluate") and len(statement.text.split(' ', 1)) > 1) or (
+            statement.text.startswith("Import") and len(statement.text.split(' ', 2)) > 2) or (
+                statement.text.startswith("Plot") and len(statement.text.split(',', 1)) > 1) 
 
     def process(self, statement):
         statement_text = statement.text.split(' ', 1)

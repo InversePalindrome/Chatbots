@@ -18,3 +18,4 @@ bot_id = client.api_call("auth.test")["user_id"]
 
 event_type = None
 channel = None
+filename = None
