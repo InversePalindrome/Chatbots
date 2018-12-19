@@ -1,6 +1,6 @@
 """
 Copyright (c) 2018 Inverse Palindrome
-Chatbot - Chatbot.py
+Slackbot - Slackbot.py
 https://inversepalindrome.com/
 """
 
@@ -17,7 +17,7 @@ from chatterbot import ChatBot
 socket_delay = 1
 direct_mention_regex = "^<@(|[WU].+?)>(.*)"
 
-chatbot = ChatBot("MathBot", 
+slackbot = ChatBot("MathBot", 
                output_adapter="SlackOutputAdapter.SlackOutputAdapter",
                logic_adapters=[
                    {
@@ -38,14 +38,14 @@ def handle_message(text):
     user_id, message = parse_direct_mention(text)
 
     if user_id == Slack.bot_id:
-        chatbot.get_response(message)
+        slackbot.get_response(message)
 
 def parse_direct_mention(text):
     matches = re.search(direct_mention_regex, text)
 
     return (matches.group(1), matches.group(2).strip()) if matches else (None, None)
 
-def run_chatbot():
+def run_slackbot():
     if Slack.client.rtm_connect():
         while True:
             event_list = Slack.client.rtm_read()
@@ -56,4 +56,4 @@ def run_chatbot():
             time.sleep(socket_delay)
        
 if __name__ == '__main__':
-    run_chatbot()
+    run_slackbot()

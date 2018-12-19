@@ -1,6 +1,6 @@
 """
 Copyright (c) 2018 Inverse Palindrome
-Chatbot - Slack.py
+Slackbot - Slack.py
 https://inversepalindrome.com/
 """
 

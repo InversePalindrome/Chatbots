@@ -1,6 +1,6 @@
 """
 Copyright (c) 2018 Inverse Palindrome
-Chatbot - MathLogicAdapter.py
+Slackbot - MathLogicAdapter.py
 https://inversepalindrome.com/
 """
 
