@@ -8,8 +8,6 @@ https://inversepalindrome.com/
 import re
 import time
 import Slack
-import MathLogicAdapter
-import SlackOutputAdapter
 
 from chatterbot import ChatBot
 
@@ -55,5 +53,5 @@ def run_slackbot():
            
             time.sleep(socket_delay)
        
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_slackbot()

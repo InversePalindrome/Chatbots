@@ -15,7 +15,7 @@ class SlackOutputAdapter(OutputAdapter):
         Slack.client.api_call("chat.postMessage", text = statement.text, channel = Slack.channel)
 
         if Slack.filename is not None:
-            with open(Slack.filename, 'rb') as file_content:
+            with open(Slack.filename, "rb") as file_content:
                 Slack.client.api_call("files.upload", channels = Slack.channel, file=file_content)
 
         Slack.event_type = None
