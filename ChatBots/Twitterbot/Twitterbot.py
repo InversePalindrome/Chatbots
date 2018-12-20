@@ -5,17 +5,25 @@ https://inversepalindrome.com/
 """
 
 
+import time
+
 from chatterbot import ChatBot
+from chatterbot.trainers import ChatterBotCorpusTrainer
 
 
 twitterbot = ChatBot(
     "Twitterbot",
-    logic_adapters = [
-        "chatterbot.logic.BestMatch"
-    ],
-    trainer = "TwitterTrainer.TwitterTrainer")
+    input_adapter = "TwitterInputAdapter.TwitterInputAdapter",
+    output_adapter = "TwitterOutputAdapter.TwitterOutputAdapter")
+
+twitterbot.set_trainer(ChatterBotCorpusTrainer)
        
-twitterbot.train()
+twitterbot.train("chatterbot.corpus.english.greetings")
+
+def run_twitterbot():
+    while True:
+        twitterbot.get_response("Hello")
+        time.sleep(6000)
 
 if __name__ == "__main__":
-    twitterbot.train()
+    run_twitterbot()

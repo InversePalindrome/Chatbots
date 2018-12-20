@@ -5,19 +5,19 @@ https://inversepalindrome.com/
 """
 
 
-import re
 import time
 import Slack
 
 from chatterbot import ChatBot
+from UnrecognizedInputException import UnrecognizedInputFormatException
 
 
-socket_delay = 1
-direct_mention_regex = "^<@(|[WU].+?)>(.*)"
+SOCKET_DELAY = 1
 
 slackbot = ChatBot("MathBot", 
-               output_adapter="SlackOutputAdapter.SlackOutputAdapter",
-               logic_adapters=[
+               input_adapter = "SlackInputAdapter.SlackInputAdapter",
+               output_adapter = "SlackOutputAdapter.SlackOutputAdapter",
+               logic_adapters = [
                    {
                        "import_path" : "MathLogicAdapter.MathLogicAdapter"
                    }
@@ -30,18 +30,10 @@ def handle_event(event):
     text = event.get("text")
 
     if Slack.event_type == "message" and not "subtype" in event:
-        handle_message(text)
-
-def handle_message(text):
-    user_id, message = parse_direct_mention(text)
-
-    if user_id == Slack.bot_id:
-        slackbot.get_response(message)
-
-def parse_direct_mention(text):
-    matches = re.search(direct_mention_regex, text)
-
-    return (matches.group(1), matches.group(2).strip()) if matches else (None, None)
+        try:
+            slackbot.get_response(text)
+        except UnrecognizedInputFormatException:
+            print("Unrecognized input format!")
 
 def run_slackbot():
     if Slack.client.rtm_connect():
@@ -51,7 +43,7 @@ def run_slackbot():
             for event in event_list:   
                 handle_event(event)
            
-            time.sleep(socket_delay)
+            time.sleep(SOCKET_DELAY)
        
 if __name__ == "__main__":
     run_slackbot()
